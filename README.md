@@ -7,14 +7,6 @@ This is not a full development stack, but it provides an opportunity to get fami
 
 This is a simple Docker Compose setup with a few sample images generated using DALL·E. The stack uses a precompiled `latest` image of Photoprism and provides an easy way to control it via environment variables.
 
-## License Information for Used Containers
-
-| Container      | License                                  | License Link                                                     |
-|----------------|------------------------------------------|------------------------------------------------------------------|
-| **MariaDB**    | GPL v2                                   | [GPL v2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
-| **Photoprism** | GNU Affero General Public License v3.0   | [AGPL v3.0](https://github.com/photoprism/photoprism)            |
-
-
 #### Caution! Caution! This stack is intended for development use only and is not configured for production. For production use, please refer to the "Easy-Stack-Prod" stack - comming soon.
 
 ## Important Notice
@@ -130,6 +122,12 @@ The application consists of several Docker containers that provide various servi
             - 0.0.0.0:2342 -> 2342/tcp
     - **Name:** easy-stack-main-prod-photoprism-1
 
+## License Information for Used Containers
 
+| Container      | License                                  | License Link                                                     |
+|----------------|------------------------------------------|------------------------------------------------------------------|
+| **MariaDB**    | GPL v2                                   | [GPL v2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
+| **Photoprism** | GNU Affero General Public License v3.0   | [AGPL v3.0](https://github.com/photoprism/photoprism)            |
+| **Easy-Stack** | GPL-3.0                                  | [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html)             |
 
 
