@@ -122,7 +122,7 @@ The application consists of several Docker containers that provide various servi
             - 0.0.0.0:2342 -> 2342/tcp
     - **Name:** easy-stack-main-prod-photoprism-1
 
-## License Information for Used Containers
+## License Information
 
 | Container      | License                                  | License Link                                                     |
 |----------------|------------------------------------------|------------------------------------------------------------------|
