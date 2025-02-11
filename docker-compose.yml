@@ -1,0 +1,103 @@
+services:
+
+  photoprism:
+    image: ${DOCKER_REPO_NAME}/photoprism:${PROD_IMAGE_TAG}
+    stop_grace_period: 10s
+    depends_on:
+      - maria
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    ports:
+      - "${PHOTOPRISM_EXTERNAL_PORT}:${PHOTOPRISM_INTERNAL_PORT}"  # "2342:2342"
+    environment:
+      PHOTOPRISM_ADMIN_USER: ${PHOTOPRISM_ADMIN_USER}
+      PHOTOPRISM_ADMIN_PASSWORD: ${PHOTOPRISM_ADMIN_PASSWORD}
+      PHOTOPRISM_AUTH_MODE: ${PHOTOPRISM_AUTH_MODE}
+      PHOTOPRISM_SITE_URL: ${PHOTOPRISM_SITE_URL}
+      PHOTOPRISM_DISABLE_TLS: ${PHOTOPRISM_DISABLE_TLS}
+      PHOTOPRISM_DEFAULT_TLS: ${PHOTOPRISM_DEFAULT_TLS}
+      PHOTOPRISM_ORIGINALS_LIMIT: ${PHOTOPRISM_ORIGINALS_LIMIT}
+      PHOTOPRISM_HTTP_COMPRESSION: ${PHOTOPRISM_HTTP_COMPRESSION}
+      PHOTOPRISM_LOG_LEVEL: ${PHOTOPRISM_LOG_LEVEL}
+      PHOTOPRISM_READONLY: ${PHOTOPRISM_READONLY}
+      PHOTOPRISM_EXPERIMENTAL: ${PHOTOPRISM_EXPERIMENTAL}
+      PHOTOPRISM_DISABLE_CHOWN: ${PHOTOPRISM_DISABLE_CHOWN}
+      PHOTOPRISM_DISABLE_WEBDAV: ${PHOTOPRISM_DISABLE_WEBDAV}
+      PHOTOPRISM_DISABLE_SETTINGS: ${PHOTOPRISM_DISABLE_SETTINGS}
+      PHOTOPRISM_DISABLE_TENSORFLOW: ${PHOTOPRISM_DISABLE_TENSORFLOW}
+      PHOTOPRISM_DISABLE_FACES: ${PHOTOPRISM_DISABLE_FACES}
+      PHOTOPRISM_DISABLE_CLASSIFICATION: ${PHOTOPRISM_DISABLE_CLASSIFICATION}
+      PHOTOPRISM_DISABLE_VECTORS: ${PHOTOPRISM_DISABLE_VECTORS}
+      PHOTOPRISM_DISABLE_RAW: ${PHOTOPRISM_DISABLE_RAW}
+      PHOTOPRISM_RAW_PRESETS: ${PHOTOPRISM_RAW_PRESETS}
+      PHOTOPRISM_JPEG_QUALITY: ${PHOTOPRISM_JPEG_QUALITY}
+      PHOTOPRISM_DETECT_NSFW: ${PHOTOPRISM_DETECT_NSFW}
+      PHOTOPRISM_UPLOAD_NSFW: ${PHOTOPRISM_UPLOAD_NSFW}
+      PHOTOPRISM_EXIF_BRUTEFORCE: ${PHOTOPRISM_EXIF_BRUTEFORCE}
+      PHOTOPRISM_DATABASE_DRIVER: ${PHOTOPRISM_DATABASE_DRIVER}
+      PHOTOPRISM_DATABASE_SERVER: ${PHOTOPRISM_DATABASE_SERVER}
+      PHOTOPRISM_DATABASE_NAME: ${PHOTOPRISM_DATABASE_NAME}
+      PHOTOPRISM_DATABASE_USER: ${PHOTOPRISM_DATABASE_USER}
+      PHOTOPRISM_DATABASE_PASSWORD: ${PHOTOPRISM_DATABASE_PASSWORD}
+      PHOTOPRISM_SITE_CAPTION: ${PHOTOPRISM_SITE_CAPTION}
+      PHOTOPRISM_SITE_DESCRIPTION: ${PHOTOPRISM_SITE_DESCRIPTION}
+      PHOTOPRISM_SITE_AUTHOR: ${PHOTOPRISM_SITE_AUTHOR}
+    working_dir: /photoprism
+    volumes:
+      - ${PHOTOPRISM_VOLUMES_ORIGINALS:-photoprism-data}:/photoprism/originals
+      - ${PHOTOPRISM_VOLUMES_STORAGE:-photoprism-data}:/photoprism/storage
+      - ${PHOTOPRISM_VOLUMES_IMPORT:-photoprism-data}:/photoprism/import
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://photoprism:2342 || exit 1"]
+      interval: 16s
+      timeout: 10s
+      retries: 3
+      start_period: 11s
+    networks:
+      - default
+
+  maria:
+    image: ${DOCKER_REPO_NAME}/maria:${PROD_IMAGE_TAG}
+    ports:
+      - "${MARIA_EXTERNAL_PORT}:${MARIA_INTERNAL_PORT}"  # "33067:3306"
+    restart: unless-stopped
+    stop_grace_period: 5s
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    command: >
+      --init-file /etc/mariadb/init.sql && \
+      --innodb-buffer-pool-size=512M --transaction-isolation=READ-COMMITTED \
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci \
+      --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
+    environment:
+      MARIADB_AUTO_UPGRADE: ${MARIADB_AUTO_UPGRADE}
+      MARIADB_INITDB_SKIP_TZINFO: ${MARIADB_INITDB_SKIP_TZINFO}
+      MARIADB_TCP_PORT: ${MARIADB_TCP_PORT}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${DATABASE_MARIA_USER}
+      MARIADB_PASSWORD: ${DATABASE_MARIA_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DATABASE_MARIA_PASSWORD}
+    volumes:
+      - ${MARIA_VOLUME:-maria-data}:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      interval: 16s
+      timeout: 10s
+      retries: 3
+      start_period: 11s
+    networks:
+      - default
+
+volumes:
+  maria-data:
+  photoprism-data:
+
+
+networks:
+  default:
+    name: ${DOCKER_NETWORK}
+    driver: bridge
+
+
